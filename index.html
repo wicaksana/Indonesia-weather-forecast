@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Indonesia Weather Forecast</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/libs/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/libs/bootstrap.min.css" />
+    <script src="js/libs/jquery-2.2.3.min.js"></script>
+    <script src="js/libs/leaflet.js"></script>
+    <script src="js/libs/bootstrap.min.js"></script>
+    <script src="js/libs/d3.v3.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Indonesia Weather Forecast</h1>
+    <div id="map"></div>
+</div>
+
+<script>
+
+    var map = L.map('map').setView([-2, 118], 5);
+
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+        maxZoom: 18,
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        id: 'mapbox.streets'
+    }).addTo(map);
+
+//    var xml_file = 'http://data.bmkg.go.id/propinsi_00_1.xml';
+    var xml_data;
+    var xml_file = 'data/propinsi_00_1.xml';
+    d3.xml(xml_file, function (error, data) {
+        if(error) throw error;
+
+        xml_data = [].map.call(data.querySelectorAll('Row'), function (row) {
+            return {
+                city: row.querySelector('Kota').textContent,
+                latitude: row.querySelector('Lintang').textContent,
+                longitude: row.querySelector('Bujur').textContent,
+                office: row.querySelector('Balai').textContent
+            };
+        });
+
+        xml_data.forEach(function (d) {
+            if(!(isNaN(d.city) && isNaN(d.latitude) && isNaN(d.longitude))) {
+                L.marker([d.latitude, d.longitude]).addTo(map)
+                        .bindPopup(d.city)
+                        .openPopup();
+            } else {
+                console.log(d.city + " " + d.latitude + " " + d.longitude);
+            }
+        });
+    })
+</script>
+</body>
+</html>
